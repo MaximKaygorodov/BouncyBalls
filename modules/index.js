@@ -4,6 +4,7 @@ const screenHeight = 720;
 const freefallAcceleration = 1;
 const airFriction = 1.0055;
 const bounceIndex = -0.75;
+const ballBounce = -1;
 
 const addBall = (x, y, d) => {
   return {
@@ -12,7 +13,7 @@ const addBall = (x, y, d) => {
     d,
     r: d / 2,
     speed: {
-      x: 10,
+      x: 1,
       y: 2,
     },
   };
@@ -21,6 +22,8 @@ const addBall = (x, y, d) => {
 let ball = addBall(100, 100, r);
 
 const calculateStop = (obj) => {
+  // const isStopX = false;
+  // const isStopY = false;
   const isStopX = Math.abs(obj.speed.x) > 0.5 ? false : true;
   const isStopY = Math.abs(obj.speed.y) > 3 ? false : true;
   return { isStopX, isStopY };
@@ -28,7 +31,12 @@ const calculateStop = (obj) => {
 
 const calculateCollideOtherBall = (a, b) => {
   const radiusSum = a.r + b.r;
+  const angle = atan2(a.x - b.x, a.y - b.y);
   if (dist(a.x, a.y, b.x, b.y) < radiusSum) {
+    ball.speed.x =
+      ball.speed.x + (radiusSum - dist(a.x, a.y, b.x, b.y)) * sin(angle);
+    ball.speed.y =
+      ball.speed.y + (radiusSum - dist(a.x, a.y, b.x, b.y)) * cos(angle);
     return true;
   }
   return false;
