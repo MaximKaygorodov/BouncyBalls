@@ -1,4 +1,4 @@
-const r = 100;
+const r = 50;
 const screenWidth = 1080;
 const screenHeight = 720;
 const freefallAcceleration = 1;
@@ -14,12 +14,15 @@ const addBall = (x, y, d) => {
     r: d / 2,
     speed: {
       x: 1,
-      y: 2,
+      y: 5,
     },
   };
 };
+let balls = [];
 
-let ball = addBall(100, 100, r);
+for (let i = 1; i < 20; i++) {
+  balls.push(addBall(50 * i, 10, r - 20));
+}
 
 const calculateStop = (obj) => {
   // const isStopX = false;
@@ -32,14 +35,19 @@ const calculateStop = (obj) => {
 const calculateCollideOtherBall = (a, b) => {
   const radiusSum = a.r + b.r;
   const angle = atan2(a.x - b.x, a.y - b.y);
+
   if (dist(a.x, a.y, b.x, b.y) < radiusSum) {
-    ball.speed.x =
-      ball.speed.x + (radiusSum - dist(a.x, a.y, b.x, b.y)) * sin(angle);
-    ball.speed.y =
-      ball.speed.y + (radiusSum - dist(a.x, a.y, b.x, b.y)) * cos(angle);
-    return true;
+    const ret = {
+      ...a,
+      speed: {
+        x: a.speed.x + (radiusSum - dist(a.x, a.y, b.x, b.y)) * sin(angle),
+        y: a.speed.y + (radiusSum - dist(a.x, a.y, b.x, b.y)) * cos(angle),
+      },
+    };
+    return ret;
   }
-  return false;
+
+  return a;
 };
 
 const calculateCollideBordersX = (obj) => {
@@ -96,9 +104,12 @@ function setup() {
 function draw() {
   let mouseBall = addBall(mouseX, mouseY, r - 10);
   background(100);
-  ball = calculateNewSpeed(ball);
-  ball = calculateNewXY(ball);
-  calculateCollideOtherBall(ball, mouseBall);
+
+  for (let j = 0; j < balls.length; j++) {
+    balls[j] = calculateNewSpeed(balls[j]);
+    balls[j] = calculateNewXY(balls[j]);
+    balls[j] = calculateCollideOtherBall(balls[j], mouseBall);
+    ellipse(balls[j].x, balls[j].y, balls[j].d);
+  }
   ellipse(mouseX, mouseY, r - 10);
-  ellipse(ball.x, ball.y, ball.d);
 }
